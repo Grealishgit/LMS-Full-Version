@@ -14,7 +14,7 @@ const startServer = async () => {
 
         //Middlewares
         app.use(cors());
-        app.use(express.json()); // Ensure JSON middleware is applied globally
+        app.use(express.json()); 
 
         //Routes
         app.get('/', (req, res) => res.send("API WORKING"));
@@ -26,9 +26,9 @@ const startServer = async () => {
 
     } catch (error) {
         console.error("❌ Error starting server:", error);
-        process.exit(1); // Exit process if DB connection fails
+        process.exit(1); 
     }
 };
 
-// Start the server
+
 startServer();

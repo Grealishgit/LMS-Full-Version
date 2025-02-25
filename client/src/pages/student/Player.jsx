@@ -8,7 +8,7 @@ import YouTube from 'react-youtube'
 import Rating from '../../components/student/Rating'
 
 const Player = () => {
-    const { enrolledCourses, calaculateChapterTime } = useContext(AppContext)
+    const { enrolledCourses, calculateChapterTime } = useContext(AppContext)
     const { courseId } = useParams()
     const [courseData, setCourseData] = useState(null)
     const [openSections, setOpenSections] = useState({})
@@ -55,7 +55,7 @@ const Player = () => {
                                             src={assets.down_arrow_icon} alt="arrow-icon" />
                                         <p className='font-medium md:text-base text-sm'>{chapter.chapterTitle}</p>
                                     </div>
-                                    <p className='text-sm md:text-md'>{chapter.chapterContent.length}lectures- {calaculateChapterTime(chapter)}</p>
+                                    <p className='text-sm md:text-md'>{chapter.chapterContent.length}lectures- {calculateChapterTime(chapter)}</p>
                                 </div>
 
                                 <div className={`overflow-hidden transition-all duration-300 ${openSections[index] ? 'max-h-96' : 'max-h-0'}`}>

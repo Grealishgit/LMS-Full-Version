@@ -20,9 +20,9 @@ const CoursesDetails = () => {
     const {
         allCourses, currency,
         calculateRating,
-        calaculateNoOfLectures,
+        calculateNoOfLectures,
         calculateCourseDuration,
-        calaculateChapterTime
+        calculateChapterTime
     } = useContext(AppContext);
 
     const fetchCourseData = async () => {
@@ -86,7 +86,7 @@ const CoursesDetails = () => {
                                                 src={assets.down_arrow_icon} alt="arrow-icon" />
                                             <p className='font-medium md:text-base text-sm'>{chapter.chapterTitle}</p>
                                         </div>
-                                        <p className='text-sm md:text-md'>{chapter.chapterContent.length}lectures- {calaculateChapterTime(chapter)}</p>
+                                        <p className='text-sm md:text-md'>{chapter.chapterContent.length}lectures- {calculateChapterTime(chapter)}</p>
                                     </div>
 
                                     <div className={`overflow-hidden transition-all duration-300 ${openSections[index] ? 'max-h-96' : 'max-h-0'}`}>
@@ -175,7 +175,7 @@ const CoursesDetails = () => {
 
                             <div className='flex items-center gap-1'>
                                 <img src={assets.lesson_icon} alt="lesson icon" />
-                                <p>{calaculateNoOfLectures(courseData)}lessons</p>
+                                <p>{calculateNoOfLectures(courseData)}lessons</p>
                             </div>
 
                         </div>

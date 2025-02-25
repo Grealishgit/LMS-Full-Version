@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
     {
-        _id: { type: String, required: true },
+        _id: { type: String, required: true }, 
         name: { type: String, required: true },
-        email: { type: String, required: true },
+        email: { type: String, required: true, unique: true }, 
         imageUrl: { type: String, required: true },
         enrolledCourses: [
             {
@@ -12,9 +12,12 @@ const userSchema = new mongoose.Schema(
                 ref: 'Course'
             }
         ],
-
-    }, { timestamps: true }
+    },
+    { timestamps: true }
 );
 
+
+userSchema.index({ email: 1 }, { unique: true });
+
 const User = mongoose.model('User', userSchema);
-export default User
+export default User;

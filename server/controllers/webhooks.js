@@ -3,7 +3,7 @@ import User from "../models/User.js";
 
 export const clerkWebhooks = async (req, res) => {
     try {
-        console.log("Received Webhook Request:", req.body); // ✅ Log request data
+        console.log("Received Webhook Request:", req.body); 
 
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
         await whook.verify(JSON.stringify(req.body), {
@@ -12,7 +12,7 @@ export const clerkWebhooks = async (req, res) => {
             "svix-timestamp": req.headers["svix-timestamp"]
         });
 
-        console.log("Webhook Verified Successfully"); // ✅ Log verification success
+        console.log("Webhook Verified Successfully"); 
 
         const { data, type } = req.body;
 
@@ -20,7 +20,7 @@ export const clerkWebhooks = async (req, res) => {
             case "user.created": {
                 const userData = {
                     _id: data.id,
-                    email: data.email_addresses[0].email_address, // ✅ Fix
+                    email: data.email_addresses[0].email_address,
                     name: `${data.first_name} ${data.last_name}`,
                     imageUrl: data.image_url,
                 };
@@ -28,7 +28,7 @@ export const clerkWebhooks = async (req, res) => {
                 await User.findOneAndUpdate(
                     { _id: data.id },
                     userData,
-                    { upsert: true, new: true } // ✅ Prevent duplicate creation
+                    { upsert: true, new: true } 
                 );
 
                 res.json({});
@@ -37,7 +37,7 @@ export const clerkWebhooks = async (req, res) => {
 
             case "user.updated": {
                 const userData = {
-                    email: data.email_addresses[0].email_address, // ✅ Fix
+                    email: data.email_addresses[0].email_address, 
                     name: `${data.first_name} ${data.last_name}`,
                     imageUrl: data.image_url,
                 };

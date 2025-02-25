@@ -3,7 +3,11 @@ import mongoose from 'mongoose';
 // Connect to the MongoDB database
 const connectDB = async () => {
     try {
-        await mongoose.connect(`${process.env.MONGODB_URL}/LMS-DB`);
+        await mongoose.connect(process.env.MONGODB_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+
         console.log('MongoDB Connected Successfully');
 
     } catch (error) {

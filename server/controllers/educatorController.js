@@ -11,10 +11,10 @@ export const updateRoleToEducator = async (req, res) => {
 
         await clerkClient.users.updateUserMetadata(userId, {
             publicMetadata: {
-                role: "educator",
-                testKey: "testValue"
+                role: null  
             }
-        })
+        });
+
         res.json({ success: true, message: 'You can upload a course now' });
     } catch (error) {
         res.json({ success: false, message: error.message });

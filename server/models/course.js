@@ -18,13 +18,13 @@ const chapterSchema = new mongoose.Schema({
 }, { _id: false });
 
 
-const courseShema = new mongoose.Schema({
+const courseSchema = new mongoose.Schema({
     courseTitle: { type: String, required: true },
     courseDescription: { type: String, required: true },
     courseThumbnail: { type: String },
-    coursePrice: { type: Number, required: true },
+    coursePrice: { type: Number, required: true, min: 0, default: 0 },
     isPublished: { type: Boolean, default: true },
-    disount: { type: Number, required: true, min: 0, max: 100 },
+    discount: { type: Number, required: true, min: 0, max: 100, default: 0 }, 
     courseContent: [chapterSchema],
     courseRatings: [
         { userId: { type: String, required: true }, rating: { type: Number, required: true, min: 1, max: 5 } }
@@ -35,5 +35,7 @@ const courseShema = new mongoose.Schema({
     ],
 }, { timestamps: true, minimize: false });
 
-const Course = mongoose.model('Course', courseShema);
+
+
+const Course = mongoose.model('Course', courseSchema);
 export default Course;

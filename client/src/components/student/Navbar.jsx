@@ -3,15 +3,40 @@ import { assets } from '../..//assets/assets'
 import { Link } from 'react-router-dom'
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
 import { AppContext } from '../../context/AppContext'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const Navbar = () => {
 
-
+    const { navigate, isEducator, backendUrl, setIsEducator, getToken } = useContext(AppContext);
     const isCourseListPage = location.pathname.includes('/course-list');
 
     const { openSignIn } = useClerk();
     const { user } = useUser();
-    const { navigate, isEducator } = useContext(AppContext)
+
+    const becomeEducator = async () => {
+        try {
+            if (isEducator) {
+                navigate('/educator')
+                return;
+            }
+            const token = await getToken()
+            const { data } = await axios.get(`${backendUrl}/api/educator/update-role`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (data.success) {
+                setIsEducator(true);
+                toast.success(data.message)
+            } else {
+                toast.error(data.message)
+            }
+
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
 
     return (
         <div className={`flex w-full items-center justify-between px-4 sm:px-10 md:px-14 lg:px-36 border-b border-green-500 py-4 ${isCourseListPage ? 'bg-white' : 'bg-cyan-100/70'}`} >
@@ -21,7 +46,7 @@ const Navbar = () => {
                     {user &&
                         <>
 
-                            <button onClick={() => { navigate('/educator') }}>{isEducator ? 'Educator Dashboard' : 'Become Educator'} </button>
+                        <button className='cursor-pointer' onClick={becomeEducator}>{isEducator ? 'Educator Dashboard' : 'Become Educator'} </button>
                             | <Link to='/my-enrollments'>My Enrollments</Link>
                         </>
                     }
@@ -38,7 +63,7 @@ const Navbar = () => {
                     {user &&
                         <>
 
-                            <button onClick={() => { navigate('/educator') }}>{isEducator ? 'Educator Dashboard' : 'Become Educator'} </button>
+                        <button className='cursor-pointer' onClick={becomeEducator}>{isEducator ? 'Educator Dashboard' : 'Become Educator'} </button>
                             | <Link to='/my-enrollments'>My Enrollments</Link>
                         </>
                     }

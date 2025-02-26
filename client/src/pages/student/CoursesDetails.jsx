@@ -6,6 +6,8 @@ import { assets } from '../../assets/assets';
 import humanizeDuration from 'humanize-duration';
 import Footer from '../../components/student/Footer';
 import YouTube from 'react-youtube';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const CoursesDetails = () => {
     const { id } = useParams();
@@ -22,18 +24,63 @@ const CoursesDetails = () => {
         calculateRating,
         calculateNoOfLectures,
         calculateCourseDuration,
-        calculateChapterTime
+        calculateChapterTime, backendUrl,
+        userData, getToken
     } = useContext(AppContext);
 
     const fetchCourseData = async () => {
-        const findCourse = allCourses.find(course => course._id === id);
-        setCourseData(findCourse);
+        try {
+            const { data } = await axios.get(backendUrl + '/api/course/' + id);
+            if (data.success) {
+                setCourseData(data.courseData)
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+
+        }
     };
+
+    const enrollCourse = async () => {
+        try {
+            if (!userData) {
+                return toast.warn('Login to Enroll');
+            }
+            if (isAlreadyEnrolled) {
+                return toast.warn('Already Enrolled');
+            }
+
+            const token = await getToken();
+
+            // Use POST instead of GET
+            const { data } = await axios.post(
+                backendUrl + '/api/user/purchase',
+                { courseId: courseData._id },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (data.success) {
+                window.location.replace(data.session_url);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || error.message);
+        }
+    };
+
+
 
     useEffect(() => {
         fetchCourseData();
-    }, [allCourses]);
+    }, []);
 
+    useEffect(() => {
+        if (userData && courseData) {
+            setIsAlreadyEnrolled(userData.enrolledCourses.includes(courseData._id))
+        }
+    }, [userData, courseData]);
 
     const toggleSection = (index) => {
         setOpenSections((prev) => (
@@ -68,57 +115,51 @@ const CoursesDetails = () => {
                         </div>
                         <p className='text-red-500'>({courseData.courseRatings.length}
                             {courseData.courseRatings.length > 1 ? ' ratings' : ' rating'})</p>
-                        <p className='text-green-500'>
-                            {courseData?.enrolledStudents?.length || 0}
-                            {courseData?.enrolledStudents?.length > 1 ? ' Students' : ' Student'}
-                        </p>
-
+                        <p className='text-green-500'>{courseData.enrolledStudents.length}{courseData.enrolledStudents.length > 1 ? ' Students' : ' Student'}</p>
                     </div>
-                    <p className='text-sm'>Course by <span className='text-green-600 underline'>Hunter</span></p>
+                    <p className='text-sm'>Course by <span className='text-green-600 underline'>{courseData.educator.name}</span></p>
 
                     <div className='pt-8 text-gray-800'>
                         <h2 className='text-xl font-semibold'>Course Structure</h2>
 
                         <div className='pt-5'>
-                            {courseData?.courseContent?.length > 0 ? (
-                                courseData.courseContent.map((chapter, index) => (
-                                    <div key={index} className='border border-gray-300 bg-white mb-2 rounded'>
-                                        <div className='flex items-center justify-between px-4 py-3 cursor-pointer select-none'
-                                            onClick={() => toggleSection(index)}>
-                                            <div className='flex items-center gap-2'>
-                                                <img className={`transform transition-transform ${openSections[index] ? 'rotate-180' : ''}`}
-                                                    src={assets.down_arrow_icon} alt="arrow-icon" />
-                                                <p className='font-medium md:text-base text-sm'>{chapter.chapterTitle}</p>
-                                            </div>
-                                            <p className='text-sm md:text-md'>{chapter.chapterContent.length} lectures - {calculateChapterTime(chapter)}</p>
+                            {courseData.courseContent.map((chapter, index) => (
+                                <div key={index} className='border border-gray-300 bg-white mb-2 
+                                rounded'>
+                                    <div className='flex items-center justify-between px-4 py-3 cursor-pointer select-none'
+                                        onClick={() => toggleSection(index)}>
+                                        <div className='flex items-center gap-2'>
+                                            <img className={`transform transition-transform ${openSections[index] ? 'rotate-180' : ''}`}
+                                                src={assets.down_arrow_icon} alt="arrow-icon" />
+                                            <p className='font-medium md:text-base text-sm'>{chapter.chapterTitle}</p>
                                         </div>
-
-                                        <div className={`overflow-hidden transition-all duration-300 ${openSections[index] ? 'max-h-96' : 'max-h-0'}`}>
-                                            <ul className='list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300'>
-                                                {chapter?.chapterContent?.map((lecture, i) => (
-                                                    <li key={i} className='flex items-start gap-2 py-1'>
-                                                        <img src={assets.play_icon} alt="play icon" className='w-4 h-4 mt-1' />
-                                                        <div className='flex items-center justify-between w-full text-gray-800 text-xs md:text-md'>
-                                                            <p>{lecture.lectureTitle}</p>
-                                                            <div className='flex gap-2'>
-                                                                {lecture.isPreviewFree && (
-                                                                    <p onClick={() => setPlayerData({ videoId: lecture.lectureUrl.split('/').pop() })}
-                                                                        className='text-green-500 cursor-pointer'>Preview
-                                                                    </p>
-                                                                )}
-                                                                <p>{humanizeDuration(lecture.lectureDuration * 60 * 1000, { units: ['h', 'm'] })}</p>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
+                                        <p className='text-sm md:text-md'>{chapter.chapterContent.length}lectures- {calculateChapterTime(chapter)}</p>
                                     </div>
-                                ))
-                            ) : (
-                                <p className="text-gray-500">No course content available</p>
-                            )}
 
+                                    <div className={`overflow-hidden transition-all duration-300 ${openSections[index] ? 'max-h-96' : 'max-h-0'}`}>
+                                        <ul className='list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300'>
+                                            {chapter.chapterContent.map((lecture, i) => (
+                                                <li key={i} className='flex items-start gap-2 py-1'>
+                                                    <img src={assets.play_icon} alt="play icon" className='w-4 h-4 mt-1' />
+                                                    <div className='flex items-center justify-between w-full text-gray-800 text-xs md:text-md'>
+                                                        <p>{lecture.lectureTitle}</p>
+                                                        <div className='flex gap-2'>
+                                                            {lecture.isPreviewFree && <p
+                                                                onClick={() => setPlayerData({
+                                                                    videoId: lecture.lectureUrl.split('/').pop()
+                                                                })}
+                                                                className='text-green-500 cursor-pointer'>Preview</p>}
+                                                            <p>{humanizeDuration(lecture.lectureDuration * 60 * 1000,
+                                                                { units: ['h', 'm'] })}</p>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            ))}
                         </div>
                     </div>
 
@@ -185,7 +226,7 @@ const CoursesDetails = () => {
                             </div>
 
                         </div>
-                        <button className='md:mt-6 mt-4 w-full py-3 rounded-md bg-green-600 text-white font-medium hover:bg-yellow-500'>
+                        <button onClick={enrollCourse} className='md:mt-6 mt-4 w-full py-3 rounded-md bg-green-600 text-white font-medium hover:bg-yellow-500'>
                             {isAlreadyEnrolled ? 'Already Enrolled' : 'Enroll Now'}
                         </button>
 

@@ -2,6 +2,8 @@ import { clerkClient } from '@clerk/express'
 import Course from '../models/course.js';
 import { v2 as cloudinary } from 'cloudinary'
 import { Purchase } from '../models/purchase.js';
+import User from '../models/User.js';
+
 
 
 //Update role to educator
@@ -11,10 +13,10 @@ export const updateRoleToEducator = async (req, res) => {
 
         await clerkClient.users.updateUserMetadata(userId, {
             publicMetadata: {
-                role: null  
-            }
-        });
+                role: "educator",
 
+            }
+        })
         res.json({ success: true, message: 'You can upload a course now' });
     } catch (error) {
         res.json({ success: false, message: error.message });
@@ -77,7 +79,7 @@ export const educatorDashboard = async (req, res) => {
         const courseIds = courses.map(course => course._id);
 
         //Calculate total Earnings from purchases
-        const Purchases = await Purchases.find({
+        const Purchases = await Purchase.find({
             courseId: { $in: courseIds },
             status: 'completed'
         });
@@ -85,20 +87,20 @@ export const educatorDashboard = async (req, res) => {
         const totalEarnings = Purchases.reduce((sum, purchase) => sum + purchase.amount, 0);
 
         //Collect unique enrolled student IDs with their course titles
-        const enrolledStudents = [];
+        const enrolledStudentsData = [];
         for (const course of courses) {
             const students = await User.find({
                 _id: { $in: course.enrolledStudents }
             }, 'name imageUrl ')
 
             students.forEach(student => {
-                enrolledStudents.push({
+                enrolledStudentsData.push({
                     courseTitle: course.courseTitle,
                     student
                 });
             });
         }
-        res.json({ success: true, dashboardData: { totalEarnings, enrolledStudents, totalCourses } });
+        res.json({ success: true, dashboardData: { totalEarnings, enrolledStudentsData, totalCourses } });
 
 
     } catch (error) {
@@ -121,7 +123,7 @@ export const getEnrolledStudentsData = async (req, res) => {
 
         const enrolledStudents = purchases.map(purchase => ({
             student: purchase.userId,
-            course: purchase.courseId.courseTitle,
+            courseTitle: purchase.courseId.courseTitle,
             purchaseDate: purchase.createdAt
         }));
         res.json({ success: true, enrolledStudents });

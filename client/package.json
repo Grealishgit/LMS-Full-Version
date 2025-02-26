@@ -12,6 +12,7 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.22.6",
     "@tailwindcss/vite": "^4.0.0",
+    "axios": "^1.8.1",
     "humanize-duration": "^3.32.1",
     "quill": "^2.0.3",
     "rc-progress": "^4.0.0",

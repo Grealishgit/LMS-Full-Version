@@ -61,7 +61,7 @@ const MyEnrollments = () => {
                                 <td className='px-4 py-3 max-sm:text-right text-green-500'>
                                     <button
                                         onClick={() => navigate('/player/' + course._id)}
-                                        className='px-3 sm:px-5 py-1.5 sm:py-2 bg-green-500 max-sm:text-xs text-white rounded-md'>
+                                        className='px-3 sm:px-5 py-1.5 sm:py-2 bg-green-500 max-sm:text-xs text-white rounded-sm'>
 
                                         {progressArray[index] && progressArray[index].lectureCommpleted / progressArray[index].totalLectures === 1 ? 'Completed' : 'On Going'}
 
